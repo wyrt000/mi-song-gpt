@@ -1,0 +1,200 @@
+name: Release Plugin
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号（留空则自动生成日期版本，格式：Y.M.D）'
+        required: false
+        default: ''
+
+# 串行化同名 workflow，避免重复触发同时发同一个版本号。
+# 注意它防不住「别人往 main 推代码」——排队放行后 checkout 仍是各自触发时的 SHA，
+# 所以 bump 的 push 另有 rebase 重试兜底，见 release job 末尾。
+concurrency:
+  group: release-plugin
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.check.outputs.should_release }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 必须：默认 depth=1 且不拉 tag，git describe 会失败
+
+      - name: Check for new commits since last release
+        id: check
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "手动触发，跳过门禁直接发版"
+            echo "should_release=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          LAST_TAG="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+          if [ -z "$LAST_TAG" ]; then
+            echo "仓库尚无 tag，视为首次发版"
+            echo "should_release=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # 排除本 workflow 自己产生的 bump 提交，只数真实改动
+          COUNT="$(git log --oneline --invert-grep \
+                     --grep='^chore(release): bump to v' \
+                     "${LAST_TAG}..HEAD" | wc -l)"
+          echo "自 ${LAST_TAG} 以来的提交："
+          git log --oneline "${LAST_TAG}..HEAD"
+          echo "其中非发版提交数：${COUNT}"
+
+          if [ "$COUNT" -gt 0 ]; then
+            echo "should_release=true" >> $GITHUB_OUTPUT
+            echo "✅ 有 ${COUNT} 个新提交，继续发版" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "should_release=false" >> $GITHUB_OUTPUT
+            echo "⏭️ 自 ${LAST_TAG} 以来无新提交，跳过今日发版" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  release:
+    needs: gate
+    if: needs.gate.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 必须：bump 的 push 冲突后要 rebase，shallow clone 上做不了
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: cd frontend && npm install && npx vite build
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="$(TZ='Asia/Shanghai' date +'%Y.%-m.%-d')"
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Generated version: ${VERSION}"
+
+      - name: Update version in plugin.json / package.json
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          node -e "
+            const fs = require('fs');
+            for (const f of ['plugin.json', 'package.json']) {
+              const p = JSON.parse(fs.readFileSync(f, 'utf-8'));
+              p.version = '${VERSION}';
+              fs.writeFileSync(f, JSON.stringify(p, null, 2) + '\n');
+            }
+          "
+
+      - name: Inject Tracely config and plugin version
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          sed -i "s|appId: ''|appId: '$TRACELY_APP_ID'|" static/js/app.js
+          sed -i "s|appSecret: ''|appSecret: '$TRACELY_APP_SECRET'|" static/js/app.js
+          sed -i "s|host: ''|host: '$TRACELY_HOST'|" static/js/app.js
+          sed -i "s|const PLUGIN_VERSION = '.*'|const PLUGIN_VERSION = '${VERSION}'|" static/js/app.js
+        env:
+          TRACELY_APP_ID: ${{ secrets.TRACELY_APP_ID }}
+          TRACELY_APP_SECRET: ${{ secrets.TRACELY_APP_SECRET }}
+          TRACELY_HOST: ${{ secrets.TRACELY_HOST }}
+
+      - name: Build
+        run: npm run build
+
+      - name: Extract plugin info
+        id: plugin_info
+        run: |
+          ENTRY_PATH=$(node -p "require('./plugin.json').entryPath")
+          ZIP_NAME="${ENTRY_PATH}.jsplugin.zip"
+          echo "entryPath=${ENTRY_PATH}" >> $GITHUB_OUTPUT
+          echo "zip_name=${ZIP_NAME}" >> $GITHUB_OUTPUT
+
+      # 先把 bump 推上去，再建 Release 并把 tag 钉到这个提交上。反过来做的话
+      # tag 会落在 bump 之前，checkout 该 tag 得到的 plugin.json 版本号是上一版
+      # （v2026.8.24 的 tag 就指着 bump 前那个 commit）。
+      # dist/ 已在上一步落盘，这里改 plugin.json 不影响已构建的产物 —— 打进 zip 的
+      # plugin.json 仍是不带 download_url 的那份，保持原有产物内容不变。
+      - name: Commit version bump and push
+        id: bump
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ZIP_NAME="${{ steps.plugin_info.outputs.zip_name }}"
+          TAG="v${VERSION}"
+          # download_url 是可预测的，不必等 Release 建好再回填
+          DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/${ZIP_NAME}"
+          node -e "
+            const fs = require('fs');
+            const p = JSON.parse(fs.readFileSync('plugin.json', 'utf-8'));
+            p.version = '${VERSION}';
+            p.download_url = '${DOWNLOAD_URL}';
+            fs.writeFileSync('plugin.json', JSON.stringify(p, null, 2) + '\n');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
+            pkg.version = '${VERSION}';
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add plugin.json package.json
+          if git diff --staged --quiet; then
+            echo "版本号与 download_url 均无变化，跳过 bump 提交"
+          else
+            git commit -m "chore(release): bump to v${VERSION}"
+            # 从 checkout 到这里已经过了整个构建时长（npm ci + 两次 build），这期间
+            # 任何人往 main 推一个提交都会让裸 push 被拒、整个发版红掉。bump 只碰
+            # plugin.json / package.json 的版本号，rebase 到远端几乎不可能真冲突。
+            pushed=0
+            for attempt in 1 2 3; do
+              if git push; then pushed=1; break; fi
+              echo "push 被拒（第 ${attempt} 次），rebase 到远端后重试"
+              git fetch origin "${GITHUB_REF_NAME}"
+              if ! git rebase "origin/${GITHUB_REF_NAME}"; then
+                git rebase --abort || true
+                echo "::error::rebase 冲突，通常意味着有另一次发版在并行改版本号；请检查后手动重跑"
+                exit 1
+              fi
+              sleep $((attempt * 5))
+            done
+            if [ "$pushed" != 1 ]; then
+              echo "::error::3 次重试后仍无法推送 bump 提交"
+              exit 1
+            fi
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release on this repo
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ZIP_NAME="${{ steps.plugin_info.outputs.zip_name }}"
+          TAG="${{ steps.bump.outputs.tag }}"
+
+          # 删除已存在的同名 Release / Tag（重发版兼容）
+          if gh release view "${TAG}" &>/dev/null; then
+            gh release delete "${TAG}" --yes --cleanup-tag
+          fi
+
+          gh release create "${TAG}" \
+            "dist/${ZIP_NAME}" \
+            --target "${{ steps.bump.outputs.sha }}" \
+            --title "v${VERSION}" \
+            --notes "自动构建的 JS 插件 v${VERSION}"

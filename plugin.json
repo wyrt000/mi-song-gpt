@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/songloft-org/plugin-toolchain/main/schemas/plugin.schema.json",
+  "name": "mi-song-gpt",
+  "version": "2026.9.29",
+  "description": "基于 songloft-plugin-miot 的定制版。执行流程：固定口令 → 语音记忆 → 搜索口令 → AI 语义判定 → 问答接管。新增问答接管（小爱答不上来时由大模型接管，可联网搜索/带上下文/分段播报）、AI 播放意图语义判定、对话记录来源徽标与分阶段耗时、语音记忆重播；播放类指令优先本地曲库，其次外部搜索推流",
+  "author": "Songloft Team (forked by wyrt0)",
+  "homepage": "https://github.com/songloft-org/songloft",
+  "license": "Apache-2.0",
+  "icon": "frontend/public/icon.svg",
+  "entryPath": "miot",
+  "main": "main.js",
+  "minHostVersion": "2.9.5",
+  "renderEngine": "webf",
+  "permissions": [
+    "storage",
+    "songs.read",
+    "songs.write",
+    "playlists.read",
+    "playlists.write",
+    "inter-plugin",
+    "command",
+    "websocket"
+  ],
+  "entryHash": "a478e646d65ca59a00b60dbb341e20462522f0c39e25954dd0a4fa8c1f608b0b",
+  "zipHash": "0dd4bc3c5ae7291c8d31d01658e5ce3d619881c5bb1c8e23e690de5d7e6422ed"
+}
