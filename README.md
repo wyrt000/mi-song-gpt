@@ -166,3 +166,5 @@ function registerToMiot() {
 ## License
 
 Apache-2.0 © 2026 hanxi
+
+完整协议文本见 [LICENSE](LICENSE)。本定制版基于上游 [songloft-plugin-miot](https://github.com/songloft-org/songloft-plugin-miot) v2026.9.24 修改，改动说明见上文「与上游的区别」及 Author 节。

@@ -3,7 +3,7 @@
   "name": "mi-song-gpt",
   "version": "2026.9.29",
   "description": "基于 songloft-plugin-miot 的定制版。执行流程：固定口令 → 语音记忆 → 搜索口令 → AI 语义判定 → 问答接管。新增问答接管（小爱答不上来时由大模型接管，可联网搜索/带上下文/分段播报）、AI 播放意图语义判定、对话记录来源徽标与分阶段耗时、语音记忆重播；播放类指令优先本地曲库，其次外部搜索推流",
-  "author": "Songloft Team (forked by wyrt0)",
+  "author": "hanxi / Songloft Team (mi-song-gpt fork by wyrt0)",
   "homepage": "https://github.com/songloft-org/songloft",
   "license": "Apache-2.0",
   "icon": "frontend/public/icon.svg",
