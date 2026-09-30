@@ -1,7 +1,7 @@
 // MIoT 智能音箱插件 - 对话记录 WebSocket 推送
 //
 // 用长连接推送替代前端每 2 秒 HTTP 轮询 `/conversation/messages`：
-//   - 前端订阅 `wss?://.../api/v1/jsplugin/miot/conversation/ws?access_token=..&limit=50`
+//   - 前端订阅 `wss?://.../api/v1/jsplugin/<entryPath>/conversation/ws?access_token=..&limit=50`
 //   - 所有订阅者共享一份对话缓冲：建连先推一帧快照（最近 N 条），随后有新对话即增量推送
 //   - 复用 ConversationMonitor 的观察者回调：monitor 每 tick 检测到新消息即触发回调，
 //     无需额外定时器，也不额外增加对云端的轮询压力

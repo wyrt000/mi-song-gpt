@@ -1535,7 +1535,7 @@ export class PlaylistManager {
     // 上报后端：#466。当前用 played 端点 event=landing_failed；后端后续可据此做临时降权
     // （例如全歌单播放时把这首放到末尾）。端点存在容错：后端未实现该 event 时忽略即可。
     if (songIdAtLanding > 0) {
-      callHostAPI('POST', `/api/v1/songs/${songIdAtLanding}/played?source=miot&event=landing_failed`, undefined, { timeoutMs: 3000 }).catch(e => {
+      callHostAPI('POST', `/api/v1/songs/${songIdAtLanding}/played?source=mi-song-gpt&event=landing_failed`, undefined, { timeoutMs: 3000 }).catch(e => {
         songloft.log.warn('[PlaylistManager] landing_failed notify failed: ' + String(e));
       });
     }
@@ -2279,7 +2279,7 @@ export class PlaylistManager {
     // 通知后端当前歌曲播放完成（触发 JS 插件播放事件广播）
     const finishedSong = this.songs[this.currentIndex];
     if (finishedSong && finishedSong.id > 0) {
-      callHostAPI('POST', `/api/v1/songs/${finishedSong.id}/played?source=miot`, undefined, { timeoutMs: 3000 }).catch(e => {
+      callHostAPI('POST', `/api/v1/songs/${finishedSong.id}/played?source=mi-song-gpt`, undefined, { timeoutMs: 3000 }).catch(e => {
         songloft.log.warn('[PlaylistManager] songPlayed notify failed: ' + String(e));
       });
     }

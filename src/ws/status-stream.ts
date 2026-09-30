@@ -1,7 +1,7 @@
 // MIoT 智能音箱插件 - 播放状态 WebSocket 推送
 //
 // 用长连接推送替代前端每秒 HTTP 轮询 `/player/status`：
-//   - 前端订阅 `wss?://.../api/v1/jsplugin/miot/status/ws?account_id=..&device_id=..&access_token=..`
+//   - 前端订阅 `wss?://.../api/v1/jsplugin/<entryPath>/status/ws?account_id=..&device_id=..&access_token=..`
 //   - 同一设备的多个客户端共享一个后台推送循环（按 account_id:device_id 聚合）
 //   - 无订阅者时不启循环，避免无人观看时 24/7 空拉云端
 //   - 状态与 HTTP 端点共用 `resolvePlayerStatus`，两条链路结果不漂移

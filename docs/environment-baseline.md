@@ -48,7 +48,7 @@ SUCCESS
 
 Generated:
 
-dist/miot.jsplugin.zip
+dist/mi-song-gpt.jsplugin.zip
 
 
 ## Validate Test

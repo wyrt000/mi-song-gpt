@@ -1,6 +1,6 @@
 // MIoT 智能音箱插件 - 搜索源候选注册（插件间通信入口）
-// 其他插件通过 songloft.comm.call('miot', 'register-search-provider', {...}) 把自己
-// 登记为外部搜索源候选；miot 以宿主注入的可信 from 作为 entryPath 落盘。
+// 其他插件通过 songloft.comm.call('mi-song-gpt', 'register-search-provider', {...}) 把自己
+// 登记为外部搜索源候选；mi-song-gpt 以宿主注入的可信 from 作为 entryPath 落盘。
 // 注册表随后在 GET /search-providers 与内置 knownProviders 合并，供配置页下拉选择。
 
 /// <reference types="@songloft/plugin-sdk" />

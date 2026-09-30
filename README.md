@@ -40,11 +40,11 @@
 
 ```bash
 npm install
-npm run build       # 产物 dist/miot.jsplugin.zip
+npm run build       # 产物 dist/mi-song-gpt.jsplugin.zip
 npm run validate    # 校验 plugin.json 哈希
 ```
 
-安装：songloft 网页 → 插件页面 → 卸载官方「智能音箱」(miot) 或直接覆盖安装 → 上传 `dist/miot.jsplugin.zip`。安装后插件名为 **mi-song-gpt**。
+安装：songloft 网页 → 插件页面 → 无需卸载官方「智能音箱」(miot)，两者 entryPath 不同、可共存 → 上传 `dist/mi-song-gpt.jsplugin.zip`。安装后插件名为 **mi-song-gpt**。
 
 配置页四张卡片（对话监听 / 语音口令 / AI 口令分析 / 问答接管）、验收清单与常见问题见 [DEPLOY.md](DEPLOY.md)。
 
@@ -97,15 +97,15 @@ npm run validate    # verify plugin.json hashes
 
 同一天重复发版会覆盖当天的 Release,但版本号不变,已安装的客户端**不会**提示升级,需等次日。
 
-## 作为搜索源接入 miot（供插件开发者）
+## 作为搜索源接入 mi-song-gpt（供插件开发者）
 
-miot 在本地曲库搜不到歌时,会调用用户配置的「外部搜索源」把歌找回来推给音箱。任何插件只要实现了搜索接口,就能把自己**登记为候选**,出现在 miot 配置页的搜索源下拉里供用户一键选用——不必再靠 miot 写死内置列表。
+mi-song-gpt 在本地曲库搜不到歌时,会调用用户配置的「外部搜索源」把歌找回来推给音箱。任何插件只要实现了搜索接口,就能把自己**登记为候选**,出现在 mi-song-gpt 配置页的搜索源下拉里供用户一键选用——不必再靠内置写死列表。
 
 接入分两步:
 
 ### 1. 实现搜索接口 `/api/search/topone`
 
-`POST`,请求/响应遵循 topone 规范(完整定义见 miot 配置页「外部搜索」区的**「接口规范」**对话框):
+`POST`,请求/响应遵循 topone 规范(完整定义见 mi-song-gpt 配置页「外部搜索」区的**「接口规范」**对话框):
 
 - 请求体 `{ keyword, hint?: { title, artist, duration }, quality? }`
 - 成功响应 `{ code: 0, msg, data: { title, artist, album?, duration?, cover_url?, url?, plugin_entry_path?, source_data?, dedup_key?, lyric?, lyric_source? } }`
@@ -115,18 +115,18 @@ miot 在本地曲库搜不到歌时,会调用用户配置的「外部搜索源�
 
 ### 2. 经插件间通信(`songloft.comm`)注册为候选
 
-在你的 `plugin.json` 声明 `inter-plugin` 权限,并在 `onInit` 里向 miot 注册:
+在你的 `plugin.json` 声明 `inter-plugin` 权限,并在 `onInit` 里向 mi-song-gpt 注册:
 
 ```ts
-// 延迟 + 重试,规避与 miot 同时启动的竞态;
-// miot 未安装 / 旧版 host 无 comm 时静默跳过,绝不阻塞自身功能。
-function registerToMiot() {
+// 延迟 + 重试,规避与 mi-song-gpt 同时启动的竞态;
+// mi-song-gpt 未安装 / 旧版 host 无 comm 时静默跳过,绝不阻塞自身功能。
+function registerToMiSongGpt() {
   let attempts = 0;
   const tryRegister = async () => {
     attempts++;
     try {
       if (!songloft.comm || typeof songloft.comm.call !== 'function') return;
-      await songloft.comm.call('miot', 'register-search-provider', {
+      await songloft.comm.call('mi-song-gpt', 'register-search-provider', {
         name: '我的音源',                  // 下拉显示名
         searchPath: '/api/search/topone',  // 你的搜索路由(默认即此,可省)
         icon: '',                          // 可选
@@ -146,10 +146,10 @@ function registerToMiot() {
 
 要点:
 
-- **不用传 entryPath**:miot 以宿主注入的**可信调用方身份**为准(`from`),插件无法把自己伪造成别的插件。
+- **不用传 entryPath**:mi-song-gpt 以宿主注入的**可信调用方身份**为准(`from`),插件无法把自己伪造成别的插件。
 - **payload 字段**:`name`(显示名,缺省用 entryPath)、`searchPath`(默认 `/api/search/topone`)、`icon`(可选)。
-- **纯增强、无副作用**:注册只是让你出现在候选下拉;是否启用由用户在配置页决定。miot 会通过宿主插件列表校验你的 `installed/active` 状态,你被卸载后会自动从列表消失。
-- **向后兼容**:内置 `ytdlp/bili/subsonic` 也走这套注册流程,同时保留在 miot 的内置 fallback 列表中,兼容尚未接入的旧版本。
+- **纯增强、无副作用**:注册只是让你出现在候选下拉;是否启用由用户在配置页决定。mi-song-gpt 会通过宿主插件列表校验你的 `installed/active` 状态,你被卸载后会自动从列表消失。
+- **向后兼容**:内置 `ytdlp/bili/subsonic` 也走这套注册流程,同时保留在内置 fallback 列表中,兼容尚未接入的旧版本。
 
 ## Author
 

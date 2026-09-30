@@ -10,8 +10,16 @@ export function hostPathPrefix(): string {
   return match ? match[1] : '';
 }
 
+// 从当前页面路径捕获插件路由段（entryPath），随 plugin.json 的 entryPath 走，
+// 免得硬编码名字——改 entryPath 只需改 plugin.json 一处。
+// vite dev 路径不含该段，回退为当前构建的 entryPath。
+function entryPathSegment(): string {
+  const match = window.location.pathname.match(/^.*\/api\/v1\/jsplugin\/([^/]+)/);
+  return match ? match[1] : 'mi-song-gpt';
+}
+
 function pluginBase(): string {
-  return `${hostPathPrefix()}/api/v1/jsplugin/miot`;
+  return `${hostPathPrefix()}/api/v1/jsplugin/${entryPathSegment()}`;
 }
 
 export class ApiError extends Error {

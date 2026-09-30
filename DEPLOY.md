@@ -24,14 +24,14 @@
 
 ## 一、构建产物
 
-- 本仓库构建产物：`dist/miot.jsplugin.zip`（已构建好，直接用）
+- 本仓库构建产物：`dist/mi-song-gpt.jsplugin.zip`（已构建好，直接用）
 - 以后改了代码要重新构建：`npm install && npm run build`
 
 ## 二、安装插件（NAS 上操作）
 
 1. 打开 songloft 网页（`http://NAS_IP:58091`）→ 插件页面
-2. 如果已安装官方"智能音箱"(miot) 插件，**先卸载或直接覆盖安装**
-3. 上传 `dist/miot.jsplugin.zip` 安装
+2. 无需卸载官方"智能音箱"(miot)——本插件 entryPath 为 `mi-song-gpt`，与官方 `miot` **可共存**
+3. 上传 `dist/mi-song-gpt.jsplugin.zip` 安装
 4. 安装后确认插件名为「mi-song-gpt」，版本 `2026.9.29`
 
 > 本定制版已移除 `updateUrl`，官方仓库的自动更新**不会**覆盖你的定制版。
@@ -102,7 +102,7 @@ docker-compose 用户把对应 service 注释掉后 `docker compose up -d`。
 | `src/utils/ai_url.ts` | 新增 `aiResponsesUrl`（方舟 Responses 端点） |
 | `src/types.ts` / `src/config/manager.ts` | 新增 `QAConfig`/`VoiceOutcome` 类型与 `qa_config` 独立存储键 |
 | `frontend/src/*` | 设置页新增「问答接管」卡片与问答测试；对话监听状态栏新增「AI判定/问答接管」状态 chips；最近对话记录每条标注来源徽标+耗时，并新增判定反馈/分阶段耗时 meta 行 |
-| `plugin.json` | 名称改为 mi-song-gpt；版本 2026.9.29；移除 updateUrl/download_url（防自动更新覆盖） |
+| `plugin.json` | 名称改为 mi-song-gpt；entryPath 改为 `mi-song-gpt`（与官方 miot 共存）；版本 2026.9.29；移除 updateUrl/download_url（防自动更新覆盖） |
 
 升级官方插件时，重新套用以上改动即可（qa_fallback.ts 为独立新文件，其余是小接线点）。
 
@@ -153,4 +153,4 @@ docker-compose 用户把对应 service 注释掉后 `docker compose up -d`。
 
 ## 八、回滚
 
-直接重新安装官方 miot 插件 zip 即可完全恢复原版行为；`qa_config` 等存储键不影响原版运行。
+本插件 entryPath 已改为 `mi-song-gpt`，回滚即**卸载 mi-song-gpt**（可保留数据），再按需安装官方 miot——两者互不影响。旧版覆盖安装期间留在 `miot` 命名空间的存储键（`qa_config` 等）不影响官方插件运行。
