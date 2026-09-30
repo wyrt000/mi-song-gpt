@@ -568,7 +568,7 @@ export class MinaService {
         presence: apiDev.presence || 'offline',
         managed: local?.managed ?? false,
         volume: local?.volume ?? 0,
-        play_mode: local?.play_mode ?? 'order',
+        play_mode: local?.play_mode ?? 'loop',
         playlist_id: local?.playlist_id ?? 0,
         current_song_index: local?.current_song_index ?? 0,
         last_selected_at: local?.last_selected_at ?? '',

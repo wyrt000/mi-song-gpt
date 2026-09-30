@@ -1,27 +1,27 @@
 {
-    "name":  "mi-song-gpt",
-    "version":  "2026.9.29",
-    "description":  "mi-song-gpt：基于 songloft-plugin-miot 的定制版（问答接管 + AI 语义判定）",
-    "private":  true,
-    "scripts":  {
-                    "prebuild":  "node scripts/fetch-holidays.mjs \u0026\u0026 node scripts/build-pinyin-data.mjs",
-                    "build":  "songloft-plugin build",
-                    "predev":  "node scripts/fetch-holidays.mjs \u0026\u0026 node scripts/build-pinyin-data.mjs",
-                    "dev":  "songloft-plugin dev",
-                    "validate":  "songloft-plugin validate",
-                    "publish:release":  "songloft-plugin publish",
-                    "fetch:holidays":  "node scripts/fetch-holidays.mjs",
-                    "build:pinyin":  "node scripts/build-pinyin-data.mjs",
-                    "sync:tts":  "node scripts/sync-tts-commands.mjs"
-                },
-    "devDependencies":  {
-                            "@songloft/plugin-builder":  "^2.13.7",
-                            "@songloft/plugin-sdk":  "^2.13.8",
-                            "pinyin-pro":  "^3.28.1",
-                            "segmentit":  "^2.0.3",
-                            "typescript":  "^5.9.3"
-                        },
-    "dependencies":  {
-                         "pako":  "^1.0.11"
-                     }
+  "name": "mi-song-gpt",
+  "version": "2026.9.30",
+  "description": "mi-song-gpt：基于 songloft-plugin-miot 的定制版（问答接管 + AI 语义判定）",
+  "private": true,
+  "scripts": {
+    "prebuild": "node scripts/fetch-holidays.mjs && node scripts/build-pinyin-data.mjs",
+    "build": "songloft-plugin build",
+    "predev": "node scripts/fetch-holidays.mjs && node scripts/build-pinyin-data.mjs",
+    "dev": "songloft-plugin dev",
+    "validate": "songloft-plugin validate",
+    "publish:release": "songloft-plugin publish",
+    "fetch:holidays": "node scripts/fetch-holidays.mjs",
+    "build:pinyin": "node scripts/build-pinyin-data.mjs",
+    "sync:tts": "node scripts/sync-tts-commands.mjs"
+  },
+  "devDependencies": {
+    "@songloft/plugin-builder": "^2.13.7",
+    "@songloft/plugin-sdk": "^2.13.8",
+    "pinyin-pro": "^3.28.1",
+    "segmentit": "^2.0.3",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "pako": "^1.0.11"
+  }
 }

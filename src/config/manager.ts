@@ -99,6 +99,7 @@ function defaultPluginConfig(): PluginConfig {
     max_song_index: 10000,
     ai_config: defaultAIConfig(),
     qa_config: defaultQAConfig(),
+    play_mode_default_migrated: false,
   };
 }
 
@@ -251,6 +252,44 @@ export class ConfigManager {
       }];
     }
     return [];
+  }
+
+  /**
+   * 一次性迁移：默认播放模式由「顺序播放」(order) 改为「列表循环」(loop)。
+   * 遍历所有账号的设备配置，把落盘的 play_mode === 'order' 翻成 'loop'，随后置位
+   * play_mode_default_migrated 落盘，此后启动不再执行——之后用户手动切回的「顺序播放」
+   * 不会被再次覆盖；无设备的新装同样置位。整体 try/catch，失败不阻塞插件初始化。
+   */
+  async migratePlayModeDefaultOnce(): Promise<void> {
+    try {
+      if (this.configCache === null) {
+        this.configCache = this.load<Partial<PluginConfig>>(STORAGE_KEY_CONFIG, {});
+      }
+      const stored = await this.configCache;
+      if (stored.play_mode_default_migrated) return;
+      const accounts = await this.getAccounts();
+      let flipped = 0;
+      for (const acc of accounts) {
+        const devs: DeviceConfig[] = acc.devices || [];
+        for (const dev of devs) {
+          if (dev.play_mode === 'order') {
+            dev.play_mode = 'loop';
+            flipped++;
+          }
+        }
+      }
+      if (flipped > 0) {
+        await this.saveAccounts(accounts);
+      }
+      const next = { ...stored, play_mode_default_migrated: true };
+      await this.save(STORAGE_KEY_CONFIG, next);
+      this.configCache = Promise.resolve(next);
+      if (flipped > 0) {
+        songloft.log.info('[Config] default play mode migration: ' + flipped + ' device(s) order -> loop');
+      }
+    } catch (e) {
+      songloft.log.warn('[Config] default play mode migration failed: ' + String(e));
+    }
   }
 
   /** 保存插件全局配置 */

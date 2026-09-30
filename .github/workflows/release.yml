@@ -130,21 +130,17 @@ jobs:
       # 先把 bump 推上去，再建 Release 并把 tag 钉到这个提交上。反过来做的话
       # tag 会落在 bump 之前，checkout 该 tag 得到的 plugin.json 版本号是上一版
       # （v2026.8.24 的 tag 就指着 bump 前那个 commit）。
-      # dist/ 已在上一步落盘，这里改 plugin.json 不影响已构建的产物 —— 打进 zip 的
-      # plugin.json 仍是不带 download_url 的那份，保持原有产物内容不变。
+      # dist/ 已在上一步落盘，这里只改版本号（本 fork 不回填 download_url），不影响已构建的产物。
       - name: Commit version bump and push
         id: bump
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           ZIP_NAME="${{ steps.plugin_info.outputs.zip_name }}"
           TAG="v${VERSION}"
-          # download_url 是可预测的，不必等 Release 建好再回填
-          DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/${ZIP_NAME}"
           node -e "
             const fs = require('fs');
             const p = JSON.parse(fs.readFileSync('plugin.json', 'utf-8'));
             p.version = '${VERSION}';
-            p.download_url = '${DOWNLOAD_URL}';
             fs.writeFileSync('plugin.json', JSON.stringify(p, null, 2) + '\n');
             const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
             pkg.version = '${VERSION}';
@@ -154,7 +150,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add plugin.json package.json
           if git diff --staged --quiet; then
-            echo "版本号与 download_url 均无变化，跳过 bump 提交"
+            echo "版本号无变化，跳过 bump 提交"
           else
             git commit -m "chore(release): bump to v${VERSION}"
             # 从 checkout 到这里已经过了整个构建时长（npm ci + 两次 build），这期间

@@ -223,7 +223,7 @@ export async function resolvePlaylistResumeStart(
 }
 
 /** 统一播放模式，并兼容旧版 Web 前端曾写入的别名。 */
-export function normalizePlayMode(mode: unknown, fallback: PlayMode = 'order'): PlayMode {
+export function normalizePlayMode(mode: unknown, fallback: PlayMode = 'loop'): PlayMode {
   switch (String(mode || '')) {
     case 'order':
       return 'order';
@@ -290,7 +290,7 @@ export class PlaylistManager {
   private configManager: ConfigManager;
 
   private state: PlayState = 'idle';
-  private playMode: PlayMode = 'order';
+  private playMode: PlayMode = 'loop';
   private playlistId: number = 0;
   private songs: Song[] = [];
   private currentIndex: number = 0;
@@ -375,7 +375,7 @@ export class PlaylistManager {
    * 播放歌单
    * @param playlistId - 歌单ID
    * @param startIndex - 起始歌曲索引（默认0）
-   * @param mode - 播放模式（默认order）
+   * @param mode - 播放模式（默认loop）
    * @param opts.randomStart - 忽略 startIndex，加载歌单后随机挑一首作为起点
    * @returns 是否成功
    */
@@ -436,7 +436,7 @@ export class PlaylistManager {
    * 找不到该歌曲时回退到 fallbackIndex（未传则歌单头部）。
    * @param playlistId - 歌单ID
    * @param songId - 起始歌曲ID（通常是刚追加到歌单末尾的那首）
-   * @param mode - 播放模式（默认order）
+   * @param mode - 播放模式（默认loop）
    * @param fallbackIndex - 歌单内找不到 songId 时的兜底起始下标
    * @returns 是否成功
    */

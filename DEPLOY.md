@@ -32,7 +32,7 @@
 1. 打开 songloft 网页（`http://NAS_IP:58091`）→ 插件页面
 2. 无需卸载官方"智能音箱"(miot)——本插件 entryPath 为 `mi-song-gpt`，与官方 `miot` **可共存**
 3. 上传 `dist/mi-song-gpt.jsplugin.zip` 安装
-4. 安装后确认插件名为「mi-song-gpt」，版本 `2026.9.29`
+4. 安装后确认插件名为「mi-song-gpt」，版本 `2026.9.30`
 
 > 本定制版已移除 `updateUrl`，官方仓库的自动更新**不会**覆盖你的定制版。
 
@@ -102,7 +102,9 @@ docker-compose 用户把对应 service 注释掉后 `docker compose up -d`。
 | `src/utils/ai_url.ts` | 新增 `aiResponsesUrl`（方舟 Responses 端点） |
 | `src/types.ts` / `src/config/manager.ts` | 新增 `QAConfig`/`VoiceOutcome` 类型与 `qa_config` 独立存储键 |
 | `frontend/src/*` | 设置页新增「问答接管」卡片与问答测试；对话监听状态栏新增「AI判定/问答接管」状态 chips；最近对话记录每条标注来源徽标+耗时，并新增判定反馈/分阶段耗时 meta 行 |
-| `plugin.json` | 名称改为 mi-song-gpt；entryPath 改为 `mi-song-gpt`（与官方 miot 共存）；版本 2026.9.29；移除 updateUrl/download_url（防自动更新覆盖） |
+| `plugin.json` | 名称改为 mi-song-gpt；entryPath 改为 `mi-song-gpt`（与官方 miot 共存）；版本 2026.9.30；移除 updateUrl/download_url（防自动更新覆盖） |
+| `src/account/manager.ts` / `src/player/manager.ts` 等 | 默认播放模式由「顺序播放」改为「列表循环」：新设备默认值、`normalizePlayMode` 兜底、`playMode` 初始值，以及定时任务 / 语音口令 / 联网搜歌 / 设备列表 / 前端各处兜底统一为 `loop`（模式弹层高亮改为「非列表循环才高亮」） |
+| `src/config/manager.ts` / `src/main.ts` | **新增** `migratePlayModeDefaultOnce()` 一次性迁移：把存量设备落盘的 `play_mode: 'order'` 翻成 `'loop'`（`play_mode_default_migrated` 标志位，只执行一次；之后手动切回的顺序播放不会被覆盖） |
 
 升级官方插件时，重新套用以上改动即可（qa_fallback.ts 为独立新文件，其余是小接线点）。
 

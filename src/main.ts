@@ -80,6 +80,8 @@ async function onInit(): Promise<void> {
 
   // 初始化管理器
   configManager = new ConfigManager();
+  // 一次性迁移：存量设备的默认播放模式 order -> loop（仅执行一次，见 ConfigManager）
+  await configManager.migratePlayModeDefaultOnce();
   accountManager = new AccountManager(configManager);
   await accountManager.init();
 

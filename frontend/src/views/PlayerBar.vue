@@ -201,7 +201,7 @@ async function cancelSleepTimer(): Promise<void> {
       <!-- 右侧：工具栏（仅宽屏显示） -->
       <div class="player-bar-tools" @click.stop>
         <PlayerModePopup
-          :model-value="state.player.play_mode || 'order'"
+          :model-value="state.player.play_mode || 'loop'"
           popup-id="bar-mode"
           :disabled="state.playerBusy"
           @change="setPlayMode"

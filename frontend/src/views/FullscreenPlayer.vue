@@ -371,7 +371,7 @@ watch(activeLyric, centerActiveLyric);
 
           <div class="fullscreen-controls fullscreen-controls-mobile">
             <PlayerModePopup
-              :model-value="state.player.play_mode || 'order'"
+              :model-value="state.player.play_mode || 'loop'"
               popup-id="full-mode"
               :disabled="state.playerBusy"
               @change="setPlayMode"
@@ -413,7 +413,7 @@ watch(activeLyric, centerActiveLyric);
             />
             <PlayerModePopup
               class="fullscreen-tool-desktop"
-              :model-value="state.player.play_mode || 'order'"
+              :model-value="state.player.play_mode || 'loop'"
               popup-id="full-mode-desktop"
               :disabled="state.playerBusy"
               @change="setPlayMode"

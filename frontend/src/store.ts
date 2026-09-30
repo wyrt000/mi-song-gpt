@@ -504,7 +504,7 @@ export async function playSong(song: Song, visibleIndex?: number): Promise<void>
       playlist_id: Number(state.selectedPlaylistId),
       song_id: song.id,
       start_index: fallbackIndex >= 0 ? fallbackIndex : visibleIndex || 0,
-      play_mode: state.player.play_mode || 'order',
+      play_mode: state.player.play_mode || 'loop',
     });
     void refreshPlaylistProgress();
   });
@@ -522,7 +522,7 @@ export async function resumePlaylist(): Promise<void> {
       ...targetBody(),
       playlist_id: Number(state.selectedPlaylistId),
       start_position: 'resume',
-      play_mode: state.player.play_mode || 'order',
+      play_mode: state.player.play_mode || 'loop',
     });
     void refreshPlaylistProgress();
   });

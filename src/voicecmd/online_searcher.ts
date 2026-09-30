@@ -347,13 +347,13 @@ export class OnlineSearcher {
     // 开始，播完后由 PlaylistManager 的切歌定时器自动续播歌单其余歌曲。
     // （直接 playURL 单曲推送不会注册切歌定时器，播完即停，见 issue #53）
     if (pm && appendedPlaylistId !== undefined) {
-      let playMode: PlayMode = 'order';
+      let playMode: PlayMode = 'loop';
       try {
         const devices = await this.configManager.getDevices(accountId);
         const devCfg = devices.find((d) => d.device_id === deviceId);
         if (devCfg && devCfg.play_mode) playMode = devCfg.play_mode as PlayMode;
       } catch (e) {
-        songloft.log.warn('[OnlineSearcher] Failed to read play mode, fallback to order: ' + String(e));
+        songloft.log.warn('[OnlineSearcher] Failed to read play mode, fallback to loop: ' + String(e));
       }
 
       const ok = await pm.playPlaylistFromSong(appendedPlaylistId, imported.id, playMode);

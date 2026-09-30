@@ -1131,7 +1131,7 @@ export class VoiceEngine {
     songloft.log.info(`[VoiceEngine] Matched playlist: ${matchedPlaylist.name} (id=${matchedPlaylist.id})`);
 
     // 获取设备配置中的播放模式
-    let playMode: PlayMode = 'order';
+    let playMode: PlayMode = 'loop';
 
     const devices = await this.configManager.getDevices(accountId);
     const devCfg = devices.find(d => d.device_id === deviceId);
@@ -1755,7 +1755,7 @@ export class VoiceEngine {
     songloft.log.info(`[VoiceEngine] Matched song: ${loc.songTitle} - ${loc.artist} playlist="${loc.playlistName}" playlistId=${loc.playlistId} songIndex=${loc.songIndex}`);
 
     // 获取设备配置中的播放模式
-    let playMode: PlayMode = 'order';
+    let playMode: PlayMode = 'loop';
     const devices = await this.configManager.getDevices(accountId);
     const devCfg = devices.find(d => d.device_id === deviceId);
     if (devCfg && devCfg.play_mode) {

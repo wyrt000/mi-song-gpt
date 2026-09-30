@@ -193,6 +193,7 @@ export interface PluginConfig {
   max_song_index: number;
   ai_config: AIConfig;
   qa_config: QAConfig;   // 问答接管配置（mi-song-gpt 新增，独立存储键 qa_config）
+  play_mode_default_migrated?: boolean; // 一次性迁移标志：默认播放模式 order->loop 是否已迁移过存量设备
 }
 
 // ===== 定时任务 =====

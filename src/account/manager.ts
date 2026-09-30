@@ -171,7 +171,7 @@ export class AccountManager {
         // 保留本地设置，新设备使用默认值
         managed: existing?.managed ?? false,
         volume: existing?.volume ?? 0,
-        play_mode: existing?.play_mode ?? 'order',
+        play_mode: existing?.play_mode ?? 'loop',
         play_speed: existing?.play_speed ?? 1,
         playlist_id: existing?.playlist_id ?? 0,
         current_song_index: existing?.current_song_index ?? 0,

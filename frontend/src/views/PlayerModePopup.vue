@@ -79,7 +79,7 @@ function choose(mode: PlayMode): void {
       class="player-tool-button"
       :title="current.label"
       :disabled="disabled"
-      :class="{ 'player-control-active': modelValue !== 'order' }"
+      :class="{ 'player-control-active': modelValue !== 'loop' }"
       @click="toggle"
     />
     <template v-if="open">

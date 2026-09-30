@@ -295,7 +295,7 @@ export class TaskExecutor {
    * - first  : 从第一首开始（默认，兼容旧任务）
    * - resume : 沿用设备持久化的 current_song_index（仅当上次播的就是同一歌单）
    * - random : 每次执行随机挑一首作为起点
-   * 播放模式：params.play_mode 指定则用它；为空表示「跟随上次」→ 用设备持久化模式；再兜底 order。
+   * 播放模式：params.play_mode 指定则用它；为空表示「跟随上次」→ 用设备持久化模式；再兜底 loop。
    */
   private async executePlayPlaylist(target: DeviceTarget, params: TaskParams, withSong: boolean): Promise<string> {
     if (!params.playlist_name && !params.playlist_id) {
@@ -323,8 +323,8 @@ export class TaskExecutor {
     // 读取设备持久化状态，供「从上次进度继续」和「跟随上次播放模式」使用
     const devCfg = await this.getDeviceConfig(target);
 
-    // 确定播放模式：显式指定 > 跟随上次（设备持久化） > 兜底 order
-    const playMode: PlayMode = ((params.play_mode || devCfg?.play_mode || 'order') as PlayMode);
+    // 确定播放模式：显式指定 > 跟随上次（设备持久化） > 兜底 loop
+    const playMode: PlayMode = ((params.play_mode || devCfg?.play_mode || 'loop') as PlayMode);
 
     // 计算给定歌单 ID 下的起始位置（歌单 ID 失效重试时会用新 ID 再算一次）
     // songId：有明确目标歌曲时返回其 ID，供 playPlaylistFromSong 按 ID 精确定位（#420）。
