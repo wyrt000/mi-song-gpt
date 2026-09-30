@@ -2,7 +2,7 @@
 
 基于 [songloft-plugin-miot](https://github.com/songloft-org/songloft-plugin-miot) 定制的 Songloft 智能音箱 JS 插件：在原插件的音乐播放能力之上，新增**问答接管**与 **AI 播放意图语义判定**——小爱答得上的不打扰，答不上来的由大模型接话（可联网搜索），播放类指令始终优先走本地曲库。
 
-> ℹ️ 与上游的区别：已移除 `updateUrl` / `download_url`，上游自动更新不会覆盖本定制版。详细部署、配置、验收与排错见 [DEPLOY.md](DEPLOY.md)。
+> ℹ️ 与上游的区别：已移除 `updateUrl`（不检查上游更新，自动更新不会覆盖本定制版）；`download_url` 指向本仓库 Release，供插件商店/订阅源安装。详细部署、配置、验收与排错见 [DEPLOY.md](DEPLOY.md)。
 
 > ™️ **商标声明**：本插件中提到的 "MIoT" "MiHome" 等协议 / 产品名称均归各自商标权人所有，相关名称的出现仅出于互操作和指示性合理使用目的。本插件**未获得任何商标持有人的授权或背书**，与上述商标持有人**无任何关联**。
 
